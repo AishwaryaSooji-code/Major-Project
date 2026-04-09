@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Fetch Sucrose Data</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        /* General Body Styling */
+     body {
+    position: relative;
+    z-index: 1;
+}
+
+/* Transparent background image layer */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    background: url('/images/sugar.jpeg') center/cover no-repeat fixed;
+
+    opacity: 0.3; /* <-- TRANSPARENCY WORKS HERE */
+    z-index: -1;  /* keep behind everything */
+}
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        /* Form Styling */
+        form {
+            background: #ffffff;
+            padding: 20px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        input[type="date"] {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 18px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color:  #4CAF50;
+        }
+
+        /* Message Styling */
+        p {
+            color: #e74c3c;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+        .center-box {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;   /* Centers horizontally */
+    justify-content: center;
+    margin-top: 40px;
+}
+
+        /* Table Styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 30px;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px 15px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: 600;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f2f6f8;
+        }
+
+        tbody tr:hover {
+            background-color: #d6eaf8;
+            transition: 0.3s;
+        }
+
+        /* PDF Button Styling */
+        #data-table + button {
+            margin-top: 20px;
+            background-color: #2ecc71;
+        }
+
+        #data-table + button:hover {
+            background-color: #27ae60;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Fetch Sucrose Data</h1>
+
+    <div class="center-box"><!-- Search Form -->
+    <form action="/fetch" method="POST">
+    <label>Date:</label>
+        <input type="date" name="date" required>
+        <button type="submit">Fetch</button>  
+    <button onclick="window.location.href='/homepage'" 
+        style=" padding: 8px 12px; font-size:16px; border-radius:5px; border:1px solid #ccc; background-color:#45a049; color:white; cursor:pointer;">
+    Go to Home
+</button>
+    </form>
+
+    <!-- Show message if any -->
+  <% if (typeof message !== 'undefined' && message) { %>
+    <p><%= message %></p>
+<% } %>
+
+
+    <!-- Show data if available -->
+    <% if (data && data.length > 0) { %>
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th>Observed Brix</th>
+                    <th>Observed Pol</th>
+                    <th>Temperature</th>
+                    <th>Corrected Brix</th>
+                    <th>Corrected Pol</th>
+                    <th>Normal Recovery</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% data.forEach(record => { %>
+                    <tr>
+                        <td><%= record.observed_brix %></td>
+                        <td><%= record.observed_pol %></td>
+                        <td><%= record.temp %></td>
+                        <td><%= record.corrected_brix %></td>
+                        <td><%= record.corrected_pol %></td>
+                        <td><%= record.normal_recovery %></td>
+                        <td><%= new Date(record.timestamp).toLocaleString() %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+        <button onclick="generatePDF()">Print as PDF</button>
+
+    <% } %>
+</div>
+    <script>
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const table = document.getElementById("data-table");
+            let rows = [];
+            for (let i = 0; i < table.rows.length; i++) {
+                let row = [];
+                for (let j = 0; j < table.rows[i].cells.length; j++) {
+                    row.push(table.rows[i].cells[j].innerText);
+                }
+                rows.push(row);
+            }
+
+            doc.autoTable({
+                head: [rows[0]],
+                body: rows.slice(1),
+            });
+            doc.save("sucrose_data.pdf");
+        }
+    </script>
+</body>
+
+</html>

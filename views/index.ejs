@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sucrose Data Prediction</title>
+    <link rel="stylesheet" href="/style.css">
+    <!-- Font Awesome CDN for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-pV9Y+JH+8/jbK9G8N5nZjH2u3R7yX6EkM+2dUq1G4R7Lwz1cbl0Rb2l1lf1sXmq7+0Pi+T2KxczsqGhi5F1hGA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <h1>Sucrose Data Prediction</h1>
+
+    <!-- Go to Home Button -->
+    
+
+    <!-- Prediction Form -->
+    <form action="/predict" method="POST">
+        <label>Observed Brix:</label>
+        <input type="text" name="observed_brix" required>
+        <label>Observed Pol:</label>
+        <input type="text" name="observed_pol" required>
+        <label>Temperature:</label>
+        <input type="text" name="temp" required>
+        <button type="submit">Predict & Save</button>
+        <button onclick="window.location.href='/homepage'" 
+        style=" padding: 8px 12px; font-size:16px; border-radius:5px; border:1px solid #ccc; background-color:#45a049; color:white; cursor:pointer;">
+    Go to Home
+</button>
+    </form>
+
+    <% if (prediction) { %>
+        <h2><%= prediction %></h2>
+    <% } %>
+
+    <hr>
+
+    <h2>Prediction History</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Observed Brix</th>
+                <th>Observed Pol</th>
+                <th>Temperature</th>
+                <th>Corrected Brix</th>
+                <th>Corrected Pol</th>
+                <th>Normal Recovery</th>
+                <th>Timestamp</th>
+                 
+            </tr>
+        </thead>
+        <tbody>
+            <% data.forEach(record => { %>
+                <tr>
+                    <td><%= record.observed_brix %></td>
+                    <td><%= record.observed_pol %></td>
+                    <td><%= record.temp %></td>
+                    <td><%= record.corrected_brix %></td>
+                    <td><%= record.corrected_pol %></td>
+                    <td><%= record.normal_recovery %></td>
+                    <td><%= new Date(record.timestamp).toLocaleString() %></td>
+            
+
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</body>
+</html>

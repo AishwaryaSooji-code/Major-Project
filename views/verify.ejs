@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Verify Email</title>
+  <meta http-equiv="Cache-Control" content="no-store" />
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+       
+    }
+
+    .verify-container {
+      background: #fff;
+      width: 380px;
+      padding: 30px;
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      animation: fadeIn 0.9s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    p {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .message {
+      text-align: center;
+      color: red;
+      min-height: 20px;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+
+    .small {
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+    }
+
+    .expired { color: red; }
+    .active { color: green; }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #bbb;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 15px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    input[type="text"]:focus {
+      border-color:#45a049;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #45a049;
+      border: none;
+      color: #fff;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover:not(:disabled) {
+      background:#45a049;
+    }
+
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .secondary-btn {
+      background:  #8ce591;
+      margin-top: 10px;
+    }
+
+    .secondary-btn:hover:not(:disabled) {
+      background: #8ce591;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="verify-container">
+
+    <h2>Email Verification</h2>
+
+    <p>OTP sent to:  
+      <b><%= email %></b>
+    </p>
+
+    <p id="message" class="message"><%= message %></p>
+
+    <p id="timerText" class="small"></p>
+
+    <!-- VERIFY FORM (NO LOGIC CHANGED) -->
+    <form id="verifyForm" action="/verify" method="POST" autocomplete="off">
+      <input type="hidden" name="email" value="<%= email %>">
+      <input type="text" name="otp" placeholder="Enter OTP" required>
+      <button id="verifyBtn" type="submit">Verify</button>
+    </form>
+
+    <!-- RESEND FORM (NO LOGIC CHANGED) -->
+    <form id="resendForm" action="/resend" method="POST">
+      <input type="hidden" name="email" value="<%= email %>">
+      <button id="resendBtn" type="submit" class="secondary-btn" disabled>Resend OTP</button>
+    </form>
+
+  </div>
+
+  <script>
+    let timer = Number("<%= timer || 0 %>");
+    const timerText = document.getElementById('timerText');
+    const resendBtn = document.getElementById('resendBtn');
+    const verifyBtn = document.getElementById('verifyBtn');
+
+    function updateTimerDisplay(seconds) {
+      if (seconds <= 0) {
+        timerText.innerText = "OTP expired. Please click Resend OTP.";
+        timerText.className = "expired small";
+        resendBtn.disabled = false;
+        verifyBtn.disabled = true;
+      } else {
+        timerText.innerText = `OTP expires in: ${seconds}s`;
+        timerText.className = "active small";
+        resendBtn.disabled = true;
+        verifyBtn.disabled = false;
+      }
+    }
+
+    function countdown() {
+      updateTimerDisplay(timer);
+      if (timer > 0) {
+        timer--;
+        setTimeout(countdown, 1000);
+      }
+    }
+
+    window.addEventListener('load', () => {
+      if (!Number.isInteger(timer) || timer < 0) timer = 0;
+      countdown();
+
+      document.querySelectorAll('input[type="text"]').forEach(i => i.value = "");
+    });
+  </script>
+
+</body>
+</html>
